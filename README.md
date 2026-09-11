@@ -1,6 +1,13 @@
 # Codex Custom Assist
 
-Home Assistant custom **conversation** integration for **OpenAI-compatible** APIs. It fills the gap left by the built-in [OpenAI Conversation](https://www.home-assistant.io/integrations/openai_conversation/) integration by letting you set a configurable `base_url` + `api_key`.
+Home Assistant custom integration for **OpenAI-compatible** APIs. One config entry exposes the same entity types as Home Assistant’s built-in OpenAI / ChatGPT integration:
+
+- **Conversation** agent
+- **Speech-to-text (STT)**
+- **Text-to-speech (TTS)**
+- **AI Task**
+
+It fills the gap left by core [OpenAI Conversation](https://www.home-assistant.io/integrations/openai_conversation/) by letting you set a configurable `base_url` + `api_key`.
 
 > **Disclaimer:** This project is a community Home Assistant custom component. It is **not affiliated with, endorsed by, or associated with** ChatGPT, Codex, OpenAI, or any related trademarks. “Codex” / “OpenAI-compatible” here only describe API compatibility.
 
@@ -12,17 +19,34 @@ Primary example: [Codex-LB](https://github.com/soju06/codex-lb) (`http://127.0.0
 
 ## Features
 
-- Config flow: API base URL, API key, model
-- Options flow: instructions prompt, Home Assistant LLM API (Assist control), temperature, top_p, max tokens, API protocol
-- Conversation agent entity for Assist
+- Config flow: API base URL, API key, conversation model
+- Options flow: per-platform models (conversation / STT / TTS / AI Task), voice, speed, prompts, Assist control, sampling, API protocol
+- Four entities under one service device (parity with the OpenAI integration entity list)
+- Soft-fail with clear errors when a backend omits audio endpoints
 - Extendable provider client (`client.py`) shared by all OpenAI-compatible backends
-- Protocol choice:
+- Protocol choice for chat/AI Task:
   - **Chat Completions** (`/v1/chat/completions`) — default, widest compatibility
   - **Responses** (`/v1/responses`) — for proxies that implement the Responses API
 
+## Platforms
+
+| Entity | Endpoint(s) | Notes |
+| --- | --- | --- |
+| Conversation | Chat Completions or Responses | Assist agent; optional HA tool control |
+| STT | `/v1/audio/transcriptions` | Default model `whisper-1` |
+| TTS | `/v1/audio/speech` | Default model `tts-1`, voice `alloy`; clear error if unsupported |
+| AI Task | Chat Completions or Responses | `GENERATE_DATA` (structured JSON / text). No image generation |
+
+### Codex-LB limitations
+
+- **Conversation / AI Task:** work when the LB exposes Chat Completions (typical).
+- **STT:** works if the LB proxies `/v1/audio/transcriptions` to a Whisper-compatible model.
+- **TTS:** often **not** implemented on Codex-LB; the TTS entity remains available and raises a clear Home Assistant error when `/v1/audio/speech` is missing.
+- **AI Task:** text/JSON data generation only — not OpenAI image generation.
+
 ## Requirements
 
-- Home Assistant **2024.12+** (ChatLog / Assist conversation entity APIs)
+- Home Assistant **2025.1+** (AI Task + ChatLog conversation entity APIs)
 - Network reachability from Home Assistant to your API host
 
 ## Install (HACS)
@@ -32,7 +56,7 @@ Primary example: [Codex-LB](https://github.com/soju06/codex-lb) (`http://127.0.0
 1. Click the badge above, **or** in HACS add custom repository `https://github.com/uniskela/codex-custom-assist` (type: Integration), **or** copy `custom_components/codex_custom_assist` into your HA `config/custom_components/` folder.
 2. Restart Home Assistant.
 3. **Settings → Devices & services → Add integration → Codex Custom Assist**.
-4. **Settings → Voice assistants** → edit an assistant → set **Conversation agent** to Codex Custom Assist.
+4. **Settings → Voice assistants** → edit an assistant → set **Conversation agent** (and optionally STT/TTS) to Codex Custom Assist.
 
 ## Configure
 
@@ -42,7 +66,7 @@ Primary example: [Codex-LB](https://github.com/soju06/codex-lb) (`http://127.0.0
 | --- | --- |
 | Base URL | `http://127.0.0.1:2455/v1` (or `http://<codex-lb-host>:2455/v1`) |
 | API key | `sk-placeholder` if API key auth is disabled; otherwise a key from the Codex-LB dashboard |
-| Model | e.g. `gpt-5.3-codex` (use a model your Codex-LB instance exposes) |
+| Conversation model | e.g. `gpt-5.3-codex` (use a model your Codex-LB instance exposes) |
 | API protocol | Chat Completions (default) |
 
 If Home Assistant runs in Docker/HA OS and Codex-LB is on the host, use a host-reachable address (not `127.0.0.1` from inside the container), e.g. `http://172.17.0.1:2455/v1` or your LAN IP.
@@ -53,21 +77,21 @@ If Home Assistant runs in Docker/HA OS and Codex-LB is on the host, use a host-r
 | --- | --- |
 | Base URL | `http://litellm:4000/v1` / `http://localai:8080/v1` / `https://openrouter.ai/api/v1` |
 | API key | Provider key (required for most cloud gateways) |
-| Model | Provider model id |
+| Conversation model | Provider model id |
 | API protocol | Chat Completions unless the provider documents Responses support |
 
 ## Options
 
-- **Instructions** — system prompt for Assist
-- **Control Home Assistant** — enable HA LLM tools
-- **Model**, **max tokens**, **temperature**, **top_p**
-- **API protocol** — Chat Completions or Responses
+- **Instructions** / **Control Home Assistant** / conversation sampling / API protocol
+- **STT model** + optional transcription prompt
+- **TTS model**, **voice**, **speed**, optional speaking instructions
+- **AI Task model** (defaults to the conversation model)
 
 ## Architecture notes
 
 - Entry **data** stores secrets/connection: `base_url`, `api_key`
-- Entry **options** store agent settings: model, prompt, `llm_hass_api`, sampling, protocol
-- `custom_components/codex_custom_assist/client.py` owns URL normalization and request payload builders so new backends stay config-only
+- Entry **options** store platform settings: models, prompts, voice, sampling, protocol
+- `custom_components/codex_custom_assist/client.py` owns URL normalization and chat/responses payload builders so new backends stay config-only
 
 ## Security
 

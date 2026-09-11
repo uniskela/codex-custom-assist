@@ -1,8 +1,6 @@
-"""The Codex Custom Assist integration — OpenAI-compatible conversation for Home Assistant."""
+"""The Codex Custom Assist integration — OpenAI-compatible Assist for Home Assistant."""
 
 from __future__ import annotations
-
-from typing import Any
 
 import openai
 from homeassistant.config_entries import ConfigEntry
@@ -14,13 +12,20 @@ from homeassistant.helpers import config_validation as cv
 from .client import create_async_client, normalize_base_url
 from .const import CONF_BASE_URL, DOMAIN, LOGGER
 
-PLATFORMS = (Platform.CONVERSATION,)
+PLATFORMS = (
+    Platform.AI_TASK,
+    Platform.CONVERSATION,
+    Platform.STT,
+    Platform.TTS,
+)
 CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
 
 type CodexCustomAssistConfigEntry = ConfigEntry[openai.AsyncOpenAI]
 
 
-async def async_setup_entry(hass: HomeAssistant, entry: CodexCustomAssistConfigEntry) -> bool:
+async def async_setup_entry(
+    hass: HomeAssistant, entry: CodexCustomAssistConfigEntry
+) -> bool:
     """Set up Codex Custom Assist from a config entry."""
     try:
         base_url = normalize_base_url(entry.data[CONF_BASE_URL])
@@ -63,12 +68,16 @@ async def async_setup_entry(hass: HomeAssistant, entry: CodexCustomAssistConfigE
     return True
 
 
-async def async_unload_entry(hass: HomeAssistant, entry: CodexCustomAssistConfigEntry) -> bool:
+async def async_unload_entry(
+    hass: HomeAssistant, entry: CodexCustomAssistConfigEntry
+) -> bool:
     """Unload a config entry."""
     return await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
 
 
-async def async_reload_entry(hass: HomeAssistant, entry: CodexCustomAssistConfigEntry) -> None:
+async def async_reload_entry(
+    hass: HomeAssistant, entry: CodexCustomAssistConfigEntry
+) -> None:
     """Reload when options change."""
     await hass.config_entries.async_reload(entry.entry_id)
 
