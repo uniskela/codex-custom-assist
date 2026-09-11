@@ -1,0 +1,72 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Codex Custom Assist",
+        "description": "Connect to an OpenAI-compatible API. For Codex-LB use `{codex_lb_url}`. For other providers use a URL like `{example_generic}`.",
+        "data": {
+          "base_url": "API base URL",
+          "api_key": "API key",
+          "chat_model": "Model"
+        },
+        "data_description": {
+          "base_url": "OpenAI-compatible base URL ending in `/v1` (or a host root — `/v1` is appended automatically).",
+          "api_key": "Provider API key. For Codex-LB with auth disabled, any placeholder works.",
+          "chat_model": "Model id exposed by the provider."
+        }
+      },
+      "reauth_confirm": {
+        "title": "Reauthenticate Codex Custom Assist",
+        "description": "Update the API key or base URL for this provider.",
+        "data": {
+          "base_url": "API base URL",
+          "api_key": "API key"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Unable to connect to the API base URL.",
+      "invalid_auth": "Invalid API key for this provider.",
+      "invalid_url": "Enter an absolute http(s) URL.",
+      "invalid_model": "Enter a model id.",
+      "unknown": "Unexpected error. Check Home Assistant logs."
+    },
+    "abort": {
+      "already_configured": "This base URL is already configured.",
+      "reauth_successful": "Reauthentication successful."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Codex Custom Assist options",
+        "description": "Tune the conversation agent for this OpenAI-compatible backend.",
+        "data": {
+          "prompt": "Instructions",
+          "llm_hass_api": "Control Home Assistant",
+          "chat_model": "Model",
+          "api_protocol": "API protocol",
+          "max_tokens": "Maximum tokens to return",
+          "temperature": "Temperature",
+          "top_p": "Top P"
+        },
+        "data_description": {
+          "prompt": "System instructions for Assist.",
+          "llm_hass_api": "Allow the model to call Home Assistant tools.",
+          "api_protocol": "Prefer Chat Completions unless your provider requires Responses."
+        }
+      }
+    },
+    "error": {
+      "invalid_model": "Enter a model id."
+    }
+  },
+  "selector": {
+    "api_protocol": {
+      "options": {
+        "chat_completions": "Chat Completions (/v1/chat/completions)",
+        "responses": "Responses (/v1/responses)"
+      }
+    }
+  }
+}
