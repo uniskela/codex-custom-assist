@@ -7,12 +7,12 @@
         "data": {
           "base_url": "API base URL",
           "api_key": "API key",
-          "chat_model": "Model"
+          "chat_model": "Conversation model"
         },
         "data_description": {
           "base_url": "OpenAI-compatible base URL ending in `/v1` (or a host root — `/v1` is appended automatically).",
           "api_key": "Provider API key. For Codex-LB with auth disabled, any placeholder works.",
-          "chat_model": "Model id exposed by the provider."
+          "chat_model": "Default chat model id (also used as the AI Task default)."
         }
       },
       "reauth_confirm": {
@@ -40,20 +40,34 @@
     "step": {
       "init": {
         "title": "Codex Custom Assist options",
-        "description": "Tune the conversation agent for this OpenAI-compatible backend.",
+        "description": "Configure Conversation, Speech-to-text, Text-to-speech, and AI Task. Audio endpoints soft-fail when the provider does not implement them.",
         "data": {
           "prompt": "Instructions",
           "llm_hass_api": "Control Home Assistant",
-          "chat_model": "Model",
+          "chat_model": "Conversation model",
           "api_protocol": "API protocol",
           "max_tokens": "Maximum tokens to return",
           "temperature": "Temperature",
-          "top_p": "Top P"
+          "top_p": "Top P",
+          "stt_model": "Speech-to-text model",
+          "stt_prompt": "Speech-to-text prompt",
+          "tts_model": "Text-to-speech model",
+          "tts_voice": "Text-to-speech voice",
+          "tts_speed": "Text-to-speech speed",
+          "tts_prompt": "Text-to-speech instructions",
+          "ai_task_model": "AI Task model"
         },
         "data_description": {
           "prompt": "System instructions for Assist.",
-          "llm_hass_api": "Allow the model to call Home Assistant tools.",
-          "api_protocol": "Prefer Chat Completions unless your provider requires Responses."
+          "llm_hass_api": "Allow the conversation model to call Home Assistant tools.",
+          "api_protocol": "Prefer Chat Completions unless your provider requires Responses.",
+          "stt_model": "Model for `/v1/audio/transcriptions` (default `whisper-1`).",
+          "stt_prompt": "Optional bias text for transcription.",
+          "tts_model": "Model for `/v1/audio/speech` (default `tts-1`).",
+          "tts_voice": "Voice id when supported by the backend.",
+          "tts_speed": "Speech rate (0.25–4.0).",
+          "tts_prompt": "Optional speaking-style instructions.",
+          "ai_task_model": "Model for AI Task data generation."
         }
       }
     },

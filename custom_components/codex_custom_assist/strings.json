@@ -7,12 +7,12 @@
         "data": {
           "base_url": "API base URL",
           "api_key": "API key",
-          "chat_model": "Model"
+          "chat_model": "Conversation model"
         },
         "data_description": {
           "base_url": "OpenAI-compatible base URL ending in `/v1` (or a host root — `/v1` is appended automatically).",
           "api_key": "Provider API key. For Codex-LB with auth disabled, any placeholder (for example `sk-placeholder`) works.",
-          "chat_model": "Model id exposed by the provider (for Codex-LB, e.g. `gpt-5.3-codex`)."
+          "chat_model": "Default chat model id (also used as the AI Task default)."
         }
       },
       "reauth_confirm": {
@@ -40,20 +40,34 @@
     "step": {
       "init": {
         "title": "Codex Custom Assist options",
-        "description": "Tune the conversation agent. These mirror the useful OpenAI Conversation settings that still apply to OpenAI-compatible backends.",
+        "description": "Configure Conversation, Speech-to-text, Text-to-speech, and AI Task for this OpenAI-compatible backend. Audio endpoints soft-fail with a clear error when the provider does not implement them.",
         "data": {
           "prompt": "Instructions",
           "llm_hass_api": "Control Home Assistant",
-          "chat_model": "Model",
+          "chat_model": "Conversation model",
           "api_protocol": "API protocol",
           "max_tokens": "Maximum tokens to return",
           "temperature": "Temperature",
-          "top_p": "Top P"
+          "top_p": "Top P",
+          "stt_model": "Speech-to-text model",
+          "stt_prompt": "Speech-to-text prompt",
+          "tts_model": "Text-to-speech model",
+          "tts_voice": "Text-to-speech voice",
+          "tts_speed": "Text-to-speech speed",
+          "tts_prompt": "Text-to-speech instructions",
+          "ai_task_model": "AI Task model"
         },
         "data_description": {
           "prompt": "System instructions for Assist. Leave blank to use Home Assistant’s default assistant prompt.",
-          "llm_hass_api": "Allow the model to call Home Assistant tools (Assist control).",
-          "api_protocol": "Chat Completions is the most compatible. Use Responses only if your provider implements `/v1/responses`."
+          "llm_hass_api": "Allow the conversation model to call Home Assistant tools (Assist control).",
+          "api_protocol": "Chat Completions is the most compatible. Use Responses only if your provider implements `/v1/responses`.",
+          "stt_model": "Model for `/v1/audio/transcriptions` (default `whisper-1`).",
+          "stt_prompt": "Optional bias text sent with transcription requests.",
+          "tts_model": "Model for `/v1/audio/speech` (default `tts-1`). Many local proxies omit TTS.",
+          "tts_voice": "OpenAI-compatible voice id when the backend supports voices.",
+          "tts_speed": "Speech rate (0.25–4.0).",
+          "tts_prompt": "Optional speaking-style instructions (ignored if the backend rejects them).",
+          "ai_task_model": "Model used for AI Task data generation (defaults to the conversation model)."
         }
       }
     },
