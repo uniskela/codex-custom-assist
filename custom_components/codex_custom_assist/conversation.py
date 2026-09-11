@@ -12,7 +12,7 @@ from homeassistant.components import conversation
 from homeassistant.const import CONF_LLM_HASS_API, CONF_PROMPT, MATCH_ALL
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import HomeAssistantError
-from homeassistant.helpers import device_registry as dr, llm
+from homeassistant.helpers import llm
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.json import json_dumps
 
@@ -21,12 +21,10 @@ from .client import build_chat_completion_kwargs, build_responses_kwargs
 from .const import (
     API_PROTOCOL_RESPONSES,
     CONF_API_PROTOCOL,
-    CONF_BASE_URL,
     CONF_CHAT_MODEL,
     CONF_MAX_TOKENS,
     CONF_TEMPERATURE,
     CONF_TOP_P,
-    DEFAULT_NAME,
     DOMAIN,
     LOGGER,
     MAX_TOOL_ITERATIONS,
@@ -36,6 +34,7 @@ from .const import (
     RECOMMENDED_TEMPERATURE,
     RECOMMENDED_TOP_P,
 )
+from .entity import CodexCustomAssistEntity
 
 PARALLEL_UPDATES = 0
 
@@ -198,26 +197,22 @@ def _extract_responses_output(response: Any) -> tuple[str | None, list[dict[str,
 
 
 class CodexCustomAssistConversationEntity(
+    CodexCustomAssistEntity,
     conversation.ConversationEntity,
     conversation.AbstractConversationAgent,
 ):
     """Codex Custom Assist conversation agent."""
 
-    _attr_has_entity_name = True
-    _attr_name = None
     _attr_supports_streaming = False
 
     def __init__(self, entry: CodexCustomAssistConfigEntry) -> None:
         """Initialize the agent."""
-        self.entry = entry
-        self._attr_unique_id = entry.entry_id
-        self._attr_device_info = dr.DeviceInfo(
-            identifiers={(DOMAIN, entry.entry_id)},
-            name=entry.title or DEFAULT_NAME,
-            manufacturer="Codex Custom Assist",
-            model=entry.options.get(CONF_CHAT_MODEL, RECOMMENDED_CHAT_MODEL),
-            entry_type=dr.DeviceEntryType.SERVICE,
-            configuration_url=entry.data.get(CONF_BASE_URL),
+        # Keep unique_id = entry_id for upgrades from 0.1.0.
+        # name=None + has_entity_name → friendly name is the device title (0.1.0).
+        super().__init__(
+            entry,
+            unique_id=entry.entry_id,
+            name=None,
         )
         if entry.options.get(CONF_LLM_HASS_API):
             self._attr_supported_features = (
