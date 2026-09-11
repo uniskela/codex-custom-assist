@@ -1,0 +1,13 @@
+{
+  "domain": "codex_custom_assist",
+  "name": "Codex Custom Assist",
+  "codeowners": ["@uniskela"],
+  "config_flow": true,
+  "dependencies": ["conversation"],
+  "documentation": "https://github.com/uniskela/codex-custom-assist",
+  "integration_type": "service",
+  "iot_class": "local_polling",
+  "issue_tracker": "https://github.com/uniskela/codex-custom-assist/issues",
+  "requirements": ["openai>=1.60.0"],
+  "version": "0.1.0"
+}
