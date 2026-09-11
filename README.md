@@ -2,6 +2,8 @@
 
 Home Assistant custom **conversation** integration for **OpenAI-compatible** APIs. It fills the gap left by the built-in [OpenAI Conversation](https://www.home-assistant.io/integrations/openai_conversation/) integration by letting you set a configurable `base_url` + `api_key`.
 
+> **Disclaimer:** This project is a community Home Assistant custom component. It is **not affiliated with, endorsed by, or associated with** ChatGPT, Codex, OpenAI, or any related trademarks. “Codex” / “OpenAI-compatible” here only describe API compatibility.
+
 Primary example: [Codex-LB](https://github.com/soju06/codex-lb) (`http://127.0.0.1:2455/v1`). Other backends (LiteLLM, LocalAI, vLLM, OpenRouter, …) are configuration — not forks.
 
 [![HACS](https://img.shields.io/badge/HACS-Custom-41BDF5.svg)](https://github.com/hacs/integration)
@@ -80,7 +82,7 @@ pip install -r requirements-dev.txt
 pytest
 ```
 
-Releases are automated with [Release Please](https://github.com/googleapis/release-please). Prefer [Conventional Commits](https://www.conventionalcommits.org/) on `main` (`feat:`, `fix:`, etc.). After merge, Release Please opens a release PR that bumps `version.txt`, `custom_components/codex_custom_assist/manifest.json`, and `CHANGELOG.md`, then tags/publishes the GitHub Release when that PR merges.
+Releases are automated with [Release Please](https://github.com/googleapis/release-please). Prefer [Conventional Commits](https://www.conventionalcommits.org/) on `main` (`feat:`, `fix:`, etc.). After merge, Release Please opens a release PR that bumps `version.txt`, `custom_components/codex_custom_assist/manifest.json`, and `CHANGELOG.md`, then tags/publishes the GitHub release when that PR merges.
 
 See [AGENTS.md](AGENTS.md) and [docs/releases.md](docs/releases.md).
 
