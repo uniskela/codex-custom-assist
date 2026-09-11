@@ -37,22 +37,36 @@ from .client import async_validate_provider, normalize_base_url
 from .const import (
     API_PROTOCOL_CHAT_COMPLETIONS,
     API_PROTOCOL_RESPONSES,
+    CONF_AI_TASK_MODEL,
     CONF_API_PROTOCOL,
     CONF_BASE_URL,
     CONF_CHAT_MODEL,
     CONF_MAX_TOKENS,
+    CONF_STT_MODEL,
+    CONF_STT_PROMPT,
     CONF_TEMPERATURE,
     CONF_TOP_P,
+    CONF_TTS_MODEL,
+    CONF_TTS_PROMPT,
+    CONF_TTS_SPEED,
+    CONF_TTS_VOICE,
     DEFAULT_API_KEY,
     DEFAULT_BASE_URL,
     DEFAULT_NAME,
+    DEFAULT_STT_PROMPT,
+    DEFAULT_TTS_PROMPT,
     DOMAIN,
     LOGGER,
     RECOMMENDED_API_PROTOCOL,
     RECOMMENDED_CHAT_MODEL,
     RECOMMENDED_MAX_TOKENS,
+    RECOMMENDED_STT_MODEL,
     RECOMMENDED_TEMPERATURE,
     RECOMMENDED_TOP_P,
+    RECOMMENDED_TTS_MODEL,
+    RECOMMENDED_TTS_SPEED,
+    RECOMMENDED_TTS_VOICE,
+    TTS_VOICES,
 )
 
 STEP_USER_DATA_SCHEMA = vol.Schema(
@@ -79,12 +93,32 @@ STEP_REAUTH_DATA_SCHEMA = vol.Schema(
 )
 
 
+def _default_options(chat_model: str) -> dict[str, Any]:
+    """Default options for a new config entry (all platforms)."""
+    return {
+        CONF_CHAT_MODEL: chat_model,
+        CONF_PROMPT: llm.DEFAULT_INSTRUCTIONS_PROMPT,
+        CONF_API_PROTOCOL: RECOMMENDED_API_PROTOCOL,
+        CONF_MAX_TOKENS: RECOMMENDED_MAX_TOKENS,
+        CONF_TEMPERATURE: RECOMMENDED_TEMPERATURE,
+        CONF_TOP_P: RECOMMENDED_TOP_P,
+        CONF_STT_MODEL: RECOMMENDED_STT_MODEL,
+        CONF_STT_PROMPT: DEFAULT_STT_PROMPT,
+        CONF_TTS_MODEL: RECOMMENDED_TTS_MODEL,
+        CONF_TTS_VOICE: RECOMMENDED_TTS_VOICE,
+        CONF_TTS_SPEED: RECOMMENDED_TTS_SPEED,
+        CONF_TTS_PROMPT: DEFAULT_TTS_PROMPT,
+        CONF_AI_TASK_MODEL: chat_model,
+    }
+
+
 def _options_schema(hass: Any, options: dict[str, Any]) -> vol.Schema:
-    """Build options schema parallel to openai_conversation where applicable."""
+    """Build options schema covering conversation, STT, TTS, and AI Task."""
     hass_apis = [
         SelectOptionDict(label=api.name, value=api.id)
         for api in llm.async_get_apis(hass)
     ]
+    chat_model = options.get(CONF_CHAT_MODEL, RECOMMENDED_CHAT_MODEL)
     return vol.Schema(
         {
             vol.Optional(
@@ -107,7 +141,7 @@ def _options_schema(hass: Any, options: dict[str, Any]) -> vol.Schema:
             ),
             vol.Required(
                 CONF_CHAT_MODEL,
-                default=options.get(CONF_CHAT_MODEL, RECOMMENDED_CHAT_MODEL),
+                default=chat_model,
             ): str,
             vol.Required(
                 CONF_API_PROTOCOL,
@@ -152,6 +186,55 @@ def _options_schema(hass: Any, options: dict[str, Any]) -> vol.Schema:
                     min=0, max=1, step=0.05, mode=NumberSelectorMode.SLIDER
                 )
             ),
+            vol.Required(
+                CONF_STT_MODEL,
+                default=options.get(CONF_STT_MODEL, RECOMMENDED_STT_MODEL),
+            ): str,
+            vol.Optional(
+                CONF_STT_PROMPT,
+                description={
+                    "suggested_value": options.get(
+                        CONF_STT_PROMPT, DEFAULT_STT_PROMPT
+                    )
+                },
+            ): TextSelector(TextSelectorConfig(multiline=True)),
+            vol.Required(
+                CONF_TTS_MODEL,
+                default=options.get(CONF_TTS_MODEL, RECOMMENDED_TTS_MODEL),
+            ): str,
+            vol.Required(
+                CONF_TTS_VOICE,
+                default=options.get(CONF_TTS_VOICE, RECOMMENDED_TTS_VOICE),
+            ): SelectSelector(
+                SelectSelectorConfig(
+                    options=[
+                        SelectOptionDict(label=voice.capitalize(), value=voice)
+                        for voice in TTS_VOICES
+                    ],
+                    mode=SelectSelectorMode.DROPDOWN,
+                    translation_key=CONF_TTS_VOICE,
+                )
+            ),
+            vol.Required(
+                CONF_TTS_SPEED,
+                default=options.get(CONF_TTS_SPEED, RECOMMENDED_TTS_SPEED),
+            ): NumberSelector(
+                NumberSelectorConfig(
+                    min=0.25, max=4.0, step=0.05, mode=NumberSelectorMode.SLIDER
+                )
+            ),
+            vol.Optional(
+                CONF_TTS_PROMPT,
+                description={
+                    "suggested_value": options.get(
+                        CONF_TTS_PROMPT, DEFAULT_TTS_PROMPT
+                    )
+                },
+            ): TextSelector(TextSelectorConfig(multiline=True)),
+            vol.Required(
+                CONF_AI_TASK_MODEL,
+                default=options.get(CONF_AI_TASK_MODEL, chat_model),
+            ): str,
         }
     )
 
@@ -219,14 +302,7 @@ class CodexCustomAssistConfigFlow(ConfigFlow, domain=DOMAIN):
                     return self.async_create_entry(
                         title=f"{DEFAULT_NAME} ({model})",
                         data=connection,
-                        options={
-                            CONF_CHAT_MODEL: model,
-                            CONF_PROMPT: llm.DEFAULT_INSTRUCTIONS_PROMPT,
-                            CONF_API_PROTOCOL: RECOMMENDED_API_PROTOCOL,
-                            CONF_MAX_TOKENS: RECOMMENDED_MAX_TOKENS,
-                            CONF_TEMPERATURE: RECOMMENDED_TEMPERATURE,
-                            CONF_TOP_P: RECOMMENDED_TOP_P,
-                        },
+                        options=_default_options(model),
                     )
 
         return self.async_show_form(
@@ -297,12 +373,20 @@ class CodexCustomAssistOptionsFlow(OptionsFlow):
         options = dict(self.config_entry.options)
 
         if user_input is not None:
-            if not user_input.get(CONF_CHAT_MODEL, "").strip():
-                errors[CONF_CHAT_MODEL] = "invalid_model"
-            else:
+            for key in (CONF_CHAT_MODEL, CONF_STT_MODEL, CONF_TTS_MODEL, CONF_AI_TASK_MODEL):
+                if key in user_input and not str(user_input.get(key, "")).strip():
+                    errors[key] = "invalid_model"
+            if not errors:
                 if not user_input.get(CONF_LLM_HASS_API):
                     user_input.pop(CONF_LLM_HASS_API, None)
-                user_input[CONF_CHAT_MODEL] = user_input[CONF_CHAT_MODEL].strip()
+                for key in (
+                    CONF_CHAT_MODEL,
+                    CONF_STT_MODEL,
+                    CONF_TTS_MODEL,
+                    CONF_AI_TASK_MODEL,
+                ):
+                    if key in user_input:
+                        user_input[key] = str(user_input[key]).strip()
                 return self.async_create_entry(title="", data=user_input)
 
         return self.async_show_form(
