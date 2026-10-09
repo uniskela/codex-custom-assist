@@ -13,6 +13,8 @@ It fills the gap left by core [OpenAI Conversation](https://www.home-assistant.i
 
 Primary example: [Codex-LB](https://github.com/soju06/codex-lb) (`http://127.0.0.1:2455/v1`). Other backends (LiteLLM, LocalAI, vLLM, OpenRouter, …) are configuration — not forks.
 
+Guides: [installation](docs/public/installation.md), [configuration](docs/public/configuration.md), [platforms and limits](docs/public/reference.md), [releases](docs/public/releases.md). Layout: [docs/README.md](docs/README.md).
+
 [![HACS](https://img.shields.io/badge/HACS-Custom-41BDF5.svg)](https://github.com/hacs/integration)
 [![Validate](https://github.com/uniskela/codex-custom-assist/actions/workflows/validate.yml/badge.svg)](https://github.com/uniskela/codex-custom-assist/actions/workflows/validate.yml)
 [![License](https://img.shields.io/github/license/uniskela/codex-custom-assist)](LICENSE)
@@ -87,12 +89,6 @@ If Home Assistant runs in Docker/HA OS and Codex-LB is on the host, use a host-r
 - **TTS model**, **voice**, **speed**, optional speaking instructions
 - **AI Task model** (defaults to the conversation model)
 
-## Architecture notes
-
-- Entry **data** stores secrets/connection: `base_url`, `api_key`
-- Entry **options** store platform settings: models, prompts, voice, sampling, protocol
-- `custom_components/codex_custom_assist/client.py` owns URL normalization and chat/responses payload builders so new backends stay config-only
-
 ## Security
 
 - Never put API keys in `configuration.yaml`.
@@ -101,14 +97,9 @@ If Home Assistant runs in Docker/HA OS and Codex-LB is on the host, use a host-r
 
 ## Development
 
-```bash
-pip install -r requirements-dev.txt
-pytest
-```
+Setup, tests, and maintainer notes: [development](docs/internal/development.md) and [architecture](docs/internal/architecture.md).
 
-Releases are automated with [Release Please](https://github.com/googleapis/release-please). Prefer [Conventional Commits](https://www.conventionalcommits.org/) on `main` (`feat:`, `fix:`, etc.). After merge, Release Please opens a release PR that bumps `version.txt`, `custom_components/codex_custom_assist/manifest.json`, and `CHANGELOG.md`, then tags/publishes the GitHub release when that PR merges.
-
-See [AGENTS.md](AGENTS.md) and [docs/releases.md](docs/releases.md).
+See [AGENTS.md](AGENTS.md) and [docs/public/releases.md](docs/public/releases.md).
 
 ## License
 

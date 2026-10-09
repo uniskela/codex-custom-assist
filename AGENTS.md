@@ -54,6 +54,16 @@ HACS reads `custom_components/codex_custom_assist/manifest.json` → `version`. 
 - [`.github/CODEOWNERS`](.github/CODEOWNERS) assigns **@uniskela** as owner of the whole tree.
 - Prefer PRs into `main` over direct pushes when branch protection is enabled.
 
+## Documentation
+
+| Audience | Path |
+| --- | --- |
+| Home Assistant setup, configuration, and reference | `docs/public/` |
+| Maintainer notes | `docs/internal/` |
+| Pointers for coding agents | `docs/agents/` |
+
+This file stays the canonical agent guide. Do not copy it into `docs/agents/`. This repository is not published on uniskela.com; do not add `docs/manifest.json` or hosted pages for it. See [docs/README.md](docs/README.md).
+
 <!-- adhd-hub:project-agent:start -->
 <!-- adhd-hub:guidance-version:6 -->
 ## ADHD Hub continuity
