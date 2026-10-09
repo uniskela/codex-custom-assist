@@ -2,8 +2,6 @@
 
 Codex Custom Assist uses [Release Please](https://github.com/googleapis/release-please) to bump versions, update `CHANGELOG.md`, and publish GitHub releases.
 
-For agent-oriented instructions (conventional commits, forcing a version with `Release-As`, PR squash checklist), see [AGENTS.md](../AGENTS.md#releases-release-please).
-
 ## Quick reference
 
 1. Merge feature work to `main` with `feat:` / `fix:` (or `Release-As: X.Y.Z` in the commit body).

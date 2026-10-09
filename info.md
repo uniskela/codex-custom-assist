@@ -4,5 +4,5 @@ OpenAI-compatible **Conversation, STT, TTS, and AI Task** for Home Assistant Ass
 
 **Disclaimer:** Not affiliated with ChatGPT, Codex, OpenAI, or related trademarks — community Assist integration only.
 
-Secrets stay in the config entry. See the [README](https://github.com/uniskela/codex-custom-assist) for setup and Codex-LB audio limitations.
+Secrets stay in the config entry. See the [README](https://github.com/uniskela/codex-custom-assist) for setup and [platforms and limits](https://github.com/uniskela/codex-custom-assist/blob/main/docs/public/reference.md) for Codex-LB audio limitations.
 
